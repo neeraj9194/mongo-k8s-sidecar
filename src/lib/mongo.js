@@ -71,37 +71,22 @@ var replSetGetStatus = function(db, done) {
 
 var initReplSet = function(db, hostIpAndPort, done) {
   console.log('initReplSet', hostIpAndPort);
-
-  var rsConfig = {
-    configsvr: config.isConfigRS,
-    members: [{
-      host: hostIpAndPort
-    }]
-  };
-
-  db.admin().command({ replSetInitiate: rsConfig }, {}, function (err) {
+  replSetGetConfig(db, function(err, rsConfig) {
     if (err) {
       return done(err);
     }
 
-    //We need to hack in the fix where the host is set to the hostname which isn't reachable from other hosts
-    replSetGetConfig(db, function(err, rsConfig) {
+    console.log('initial rsConfig is', rsConfig);
+    rsConfig.configsvr = config.isConfigRS;
+    rsConfig.members[0].host = hostIpAndPort;
+    async.retry({times: 20, interval: 500}, function(callback) {
+      replSetReconfig(db, rsConfig, false, callback);
+    }, function(err, results) {
       if (err) {
         return done(err);
       }
 
-      console.log('initial rsConfig is', rsConfig);
-      rsConfig.configsvr = config.isConfigRS;
-      rsConfig.members[0].host = hostIpAndPort;
-      async.retry({times: 20, interval: 500}, function(callback) {
-        replSetReconfig(db, rsConfig, false, callback);
-      }, function(err, results) {
-        if (err) {
-          return done(err);
-        }
-
-        return done();
-      });
+      return done();
     });
   });
 };
