@@ -79,7 +79,7 @@ var initReplSet = function(db, hostIpAndPort, done) {
     }]
   };
 
-  db.admin().command({ replSetReconfig: rsConfig }, {}, function (err) {
+  db.admin().command({ replSetInitiate: rsConfig }, {}, function (err) {
     if (err) {
       return done(err);
     }
