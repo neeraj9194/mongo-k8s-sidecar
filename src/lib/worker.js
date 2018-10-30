@@ -242,7 +242,7 @@ var addrToAddLoop = function(pods, members) {
 
     for (var j in members) {
       var member = members[j];
-      if (member.host === podIpAddr || member.host === podStableNetworkAddr) {
+      if (member.name === podIpAddr || member.name === podStableNetworkAddr) {
         /* If we have the pod's ip or the stable network address already in the config, no need to read it. Checks both the pod IP and the
         * stable network ID - we don't want any duplicates - either one of the two is sufficient to consider the node present. */
         podInRs = true;
