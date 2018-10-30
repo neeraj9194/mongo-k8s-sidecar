@@ -72,7 +72,14 @@ var replSetGetStatus = function(db, done) {
 var initReplSet = function(db, hostIpAndPort, done) {
   console.log('initReplSet', hostIpAndPort);
 
-  db.admin().command({ replSetInitiate: {} }, {}, function (err) {
+  var rsConfig = {
+    configsvr: config.isConfigRS,
+    members: [{
+      host: hostIpAndPort
+    }]
+  };
+
+  db.admin().command({ replSetReconfig: rsConfig }, {}, function (err) {
     if (err) {
       return done(err);
     }
